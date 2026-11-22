@@ -31,23 +31,32 @@ Rules: Use actions/checkout@v6, actions/setup-node@v6 and actions/upload-artifac
 - **Packages, browser, tests and the report (lines 17–32):** npm ci installs the exact packages, and it runs the playwright tests. And it uploads the playwright-report. The if: line: this step if:${{always()}} uploads test report even the test fails so still we can read the file and investigate
 
 ## 5. The first run on GitHub
-- **Run:** Add the CI workflow · **Result:** … · **Tests:** …
-- **The report (artifact):** …
+- **Run:** Add the CI workflow · **Result:** green tick · **Tests:** 22 passed
+- **The report (artifact):** yes, playwright-report is under Artifacts
 
 ## 6. A red run on purpose
 - **The change:** `tests/example.spec.ts` line 6, `toBe(200)` → `toBe(201)`
-- **My prediction:** …
-- **What GitHub showed:** …
+- **My prediction:** The run the playwright turn red because expected is 201 but received is 200
+- **What GitHub showed:** expected is 201, received is 200
 
 ## 7. Fixed, and green again
-- **The fix:** line 6 back to `toBe(200)` · **Run:** Fix the expected status · **Result:** …
+- **The fix:** line 6 back to `toBe(200)` · **Run:** Fix the expected status · **Result:** 22 passed
 
 ## 8. Review notes for my other AI-written tests (written while CI ran)
 The API checklist: status · body · shape · negative cases (a refused request changes nothing) · own test data.
 Monday's and Tuesday's tests that I did not review in depth on those days. Each one: kept, changed or removed, and why.
 
 ### Monday: `tests/api.spec.ts`
-- "…": **kept / changed / removed**, because …
+- "create an article returns 201 and the full Article": **changed**, because add a GET after creating the article
+- "read an article by slug returns 200 and the same Article": **kept**, because it reads the article and checks it's details
+- "delete an article returns 204 with no body, and the article is gone": **kept**, because it checks 204 with no body
+- "create an article without a token returns 401 token is missing": **changed**, because confrim no article was saved
+- "update someone else's article returns 403 forbidden and does not change it": **kept**, because it reads again and confirm no description changes
+- "delete an article with a wrong token returns 401 token is invalid": **kept**, because it confirms the article still exists after deletion
+- "read an article that does not exist returns 404 article not found": **kept**, because it checks 404
 
 ### Tuesday: `tests/contract.spec.ts`
-- "…": **kept / changed / removed**, because …
+- "GET /api/user answers with the User shape from API.md": **changed**, because add an exact field name check from API. Extra field still passes because the the toMatchObject allows additional fields. missing field failes if it is included in the expected object
+- "GET /api/user with no token returns 401 token is missing": **kept**, because it checks 401 and correct the error when no token is sent
+- "GET /api/user with a wrong token returns 401 token is invalid": **kept**, because correct error when wrong token sent
+- "changing someone else's article returns 403 forbidden and does not change it": **kept**, because 403 reads again to check description is not changed
